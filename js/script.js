@@ -1,4 +1,4 @@
-const WHATSAPP_NUMBER = "919876543210";
+const WHATSAPP_NUMBER = "919999999999";
 const STORE_NAME = "VÉLORA MEN";
 const CURRENCY = "₹";
 const PLACEHOLDER_IMAGE = "https://placehold.co/900x1200/f0ece3/4a463f?text=VELORA+MEN";
