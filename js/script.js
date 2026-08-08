@@ -1,6 +1,7 @@
 const WHATSAPP_NUMBER = "919876543210";
 const STORE_NAME = "VÉLORA MEN";
 const CURRENCY = "₹";
+const PLACEHOLDER_IMAGE = "https://placehold.co/900x1200/f0ece3/4a463f?text=VELORA+MEN";
 const state = { products: [], filtered: [], filter: "All", sort: "featured", search: "", wishlist: loadStorage("veloraWishlist"), bag: loadStorage("veloraEnquiryBag"), currentProduct: null, currentImage: 0, size: null, color: null, quantity: 1 };
 
 const $ = (s, root = document) => root.querySelector(s);
@@ -80,12 +81,23 @@ function renderBestSellers() {
 function updateCounts() {
   $("#wishlistCount").textContent = state.wishlist.length; $("#bagCount").textContent = state.bag.length;
   $("#bagTotal").textContent = state.bag.length;
+  $("#wishlistTotal").textContent = state.wishlist.length;
 }
 function findProduct(id) { return state.products.find(p => p.id === Number(id)) }
+function syncWishlistState() {
+  const normalized = [...new Set(state.wishlist.map(id => Number(id)).filter(Boolean))];
+  state.wishlist = normalized;
+  saveStorage("veloraWishlist", state.wishlist);
+  updateCounts();
+  renderWishlistItems();
+}
 function toggleWishlist(id) {
   id = Number(id); const p = findProduct(id); if (!p) return;
   const exists = state.wishlist.includes(id);
-  state.wishlist = exists ? state.wishlist.filter(x => x !== id) : [...state.wishlist, id]; saveStorage("veloraWishlist", state.wishlist); updateCounts();
+  state.wishlist = exists ? state.wishlist.filter(x => Number(x) !== id) : [...state.wishlist, id];
+  saveStorage("veloraWishlist", state.wishlist);
+  updateCounts();
+  renderWishlistItems();
   $$(`[data-wish="${id}"]`).forEach(btn => { btn.classList.toggle("active", !exists); btn.classList.add("pop"); btn.textContent = !exists ? "♥" : "♡"; setTimeout(() => btn.classList.remove("pop"), 450) });
   showToast(exists ? "Removed from wishlist" : "Added to wishlist");
   if (state.currentProduct?.id === id) $("#quickWishlist").textContent = !exists ? "♥" : "♡";
@@ -99,10 +111,23 @@ function toggleBag(id) {
 function renderBagItems() {
   const box = $("#bagItems");
   if (!state.bag.length) { box.innerHTML = `<div class="empty-state"><div class="empty-symbol">+</div><h3>Your selection is empty.</h3><p>Add styles you want to enquire about and send them together on WhatsApp.</p></div>`; return }
-  box.innerHTML = state.bag.map(id => { const p = findProduct(id); return `<div class="bag-item"><img src="${p.images[0]}" alt="${p.name}"><div><h4>${p.name}</h4><p>${p.category}</p><p>${money(p.discountPrice)}</p></div><button class="remove-bag" data-remove-bag="${p.id}" aria-label="Remove ${p.name}">×</button></div>` }).join("");
+  box.innerHTML = state.bag.map(id => { const p = findProduct(id); if (!p) return ""; return `<div class="bag-item"><img src="${p.images[0] || PLACEHOLDER_IMAGE}" alt="${p.name}" onerror="this.onerror=null;this.src='${PLACEHOLDER_IMAGE}'"><div><h4>${p.name}</h4><p>${p.category}</p><p>${money(p.discountPrice)}</p></div><button class="remove-bag" data-remove-bag="${p.id}" aria-label="Remove ${p.name}">×</button></div>` }).join("");
 }
 function openBag() { renderBagItems(); $("#bagPanel").classList.add("open"); $("#panelBackdrop").classList.add("open"); document.body.classList.add("lock"); $("#bagPanel").setAttribute("aria-hidden", "false") }
 function closeBag() { $("#bagPanel").classList.remove("open"); $("#panelBackdrop").classList.remove("open"); document.body.classList.remove("lock"); $("#bagPanel").setAttribute("aria-hidden", "true") }
+function renderWishlistItems() {
+  const box = $("#wishlistItems");
+  if (!state.wishlist.length) { box.innerHTML = `<div class="empty-state"><div class="empty-symbol">♡</div><h3>Your wishlist is empty.</h3><p>Tap the heart on any product to save it here.</p></div>`; return }
+  box.innerHTML = state.wishlist.map(id => { const p = findProduct(id); if (!p) return ""; return `<div class="bag-item"><img src="${p.images[0] || PLACEHOLDER_IMAGE}" alt="${p.name}" onerror="this.onerror=null;this.src='${PLACEHOLDER_IMAGE}'"><div><h4>${p.name}</h4><p>${p.category}</p><p>${money(p.discountPrice)}</p></div><div class="wish-item-actions"><button class="wish-item-quick" data-quick="${p.id}" aria-label="Quick view ${p.name}">View</button><button class="remove-wish" data-remove-wish="${p.id}" aria-label="Remove ${p.name}">×</button></div></div>` }).join("");
+}
+function openWishlist() { renderWishlistItems(); $("#wishlistPanel").classList.add("open"); $("#panelBackdrop").classList.add("open"); document.body.classList.add("lock"); $("#wishlistPanel").setAttribute("aria-hidden", "false") }
+function closeWishlist() { $("#wishlistPanel").classList.remove("open"); $("#panelBackdrop").classList.remove("open"); document.body.classList.remove("lock"); $("#wishlistPanel").setAttribute("aria-hidden", "true") }
+function sendWishlistWhatsApp() {
+  if (!state.wishlist.length) { showToast("Your wishlist is empty"); return }
+  const lines = state.wishlist.map((id, i) => { const p = findProduct(id); return `${i + 1}. ${p.name}\n   Price: ${money(p.discountPrice)}\n   Product ID: ${p.id}` }).join("\n\n");
+  const msg = `Hello ${STORE_NAME},\n\nI am interested in the following saved styles:\n\n${lines}\n\nPlease share availability and details.\n\nThank you.`;
+  openWhatsApp(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`); showToast("Wishlist prepared for WhatsApp");
+}
 function generateWhatsAppMessage(p, options = {}) {
   const size = options.size || p.sizes[0], color = options.color || p.colors[0], qty = options.quantity || 1;
   const url = `${location.href.split("#")[0]}#product-${p.id}`;
@@ -140,8 +165,11 @@ function initializeObservers() { const observer = new IntersectionObserver(entri
 function initSticky() { const header = $("#siteHeader"), back = $("#backTop"); const onScroll = () => { header.classList.toggle("scrolled", scrollY > 80); back.classList.toggle("show", scrollY > 600) }; addEventListener("scroll", onScroll, { passive: true }); onScroll() }
 function initEvents() {
   $("#searchBtn").onclick = openSearch; $("#closeSearch").onclick = closeSearch; $("#searchOverlay").addEventListener("click", e => { if (e.target.id === "searchOverlay") closeSearch() }); $("#searchInput").addEventListener("input", e => renderSearchResults(e.target.value));
-  $("#wishlistBtn").onclick = () => { setFilter("All"); document.querySelector("#catalogue").scrollIntoView({ behavior: "smooth" }); showToast("Wishlist is available on each product card") };
-  $("#bagBtn").onclick = openBag; $("#closeBag").onclick = closeBag; $("#panelBackdrop").onclick = closeBag; $("#sendBagWhatsapp").onclick = sendBagWhatsApp; $("#clearBag").onclick = () => { state.bag = []; saveStorage("veloraEnquiryBag", state.bag); updateCounts(); renderBagItems(); showToast("Selection cleared") };
+  $("#wishlistBtn").onclick = openWishlist;
+  $("#closeWishlist").onclick = closeWishlist;
+  $("#sendWishlistWhatsapp").onclick = sendWishlistWhatsApp;
+  $("#clearWishlist").onclick = () => { state.wishlist = []; saveStorage("veloraWishlist", state.wishlist); updateCounts(); renderWishlistItems(); showToast("Wishlist cleared"); $$('[data-wish]').forEach(btn => { btn.classList.remove("active"); btn.textContent = "♡" }) };
+  $("#bagBtn").onclick = openBag; $("#closeBag").onclick = closeBag; $("#panelBackdrop").onclick = () => { closeBag(); closeWishlist() }; $("#sendBagWhatsapp").onclick = sendBagWhatsApp; $("#clearBag").onclick = () => { state.bag = []; saveStorage("veloraEnquiryBag", state.bag); updateCounts(); renderBagItems(); showToast("Selection cleared") };
   $("#menuBtn").onclick = openMobileMenu; $("#closeMenu").onclick = closeMobileMenu; $("#drawerBackdrop").onclick = closeMobileMenu;
   $("#quickBackdrop").addEventListener("click", e => { if (e.target.id === "quickBackdrop") closeQuick() }); $("#closeQuick").onclick = closeQuick;
   $("#sortSelect").onchange = e => { state.sort = e.target.value; applyState() };
@@ -154,13 +182,13 @@ function initEvents() {
   $("#reviewPrev").onclick = () => $("#reviewSlider").scrollBy({ left: -360, behavior: "smooth" }); $("#reviewNext").onclick = () => $("#reviewSlider").scrollBy({ left: 360, behavior: "smooth" });
   $("#newsletterForm").onsubmit = e => { e.preventDefault(); const input = $("#email"), msg = $("#newsletterMessage"); if (!/^\S+@\S+\.\S+$/.test(input.value.trim())) { msg.textContent = "Please enter a valid email address."; return } msg.textContent = "You're on the list. Welcome to VÉLORA MEN."; input.value = ""; showToast("Welcome to the VÉLORA letter") };
   $("#backTop").onclick = () => scrollTo({ top: 0, behavior: "smooth" });
-  document.addEventListener("click", e => { const wish = e.target.closest("[data-wish]"), bag = e.target.closest("[data-bag]"), quick = e.target.closest("[data-quick]"), wa = e.target.closest("[data-wa]"), remove = e.target.closest("[data-remove-bag]"), search = e.target.closest("[data-search-id]"); if (wish) { e.preventDefault(); toggleWishlist(wish.dataset.wish) } else if (bag) { e.preventDefault(); toggleBag(bag.dataset.bag) } else if (quick) { openQuickView(quick.dataset.quick) } else if (wa) { const p = findProduct(wa.dataset.wa); sendProductWhatsApp(p) } else if (remove) { toggleBag(remove.dataset.removeBag) } else if (search) { openQuickView(search.dataset.searchId); closeSearch() } });
+  document.addEventListener("click", e => { const wish = e.target.closest("[data-wish]"), bag = e.target.closest("[data-bag]"), quick = e.target.closest("[data-quick]"), wa = e.target.closest("[data-wa]"), remove = e.target.closest("[data-remove-bag]"), search = e.target.closest("[data-search-id]"), removeWish = e.target.closest("[data-remove-wish]"), productCard = e.target.closest(".product-card"); if (wish) { e.preventDefault(); toggleWishlist(wish.dataset.wish); renderWishlistItems() } else if (bag) { e.preventDefault(); toggleBag(bag.dataset.bag) } else if (quick) { openQuickView(quick.dataset.quick) } else if (wa) { const p = findProduct(wa.dataset.wa); sendProductWhatsApp(p) } else if (remove) { toggleBag(remove.dataset.removeBag) } else if (removeWish) { toggleWishlist(removeWish.dataset.removeWish); renderWishlistItems() } else if (search) { openQuickView(search.dataset.searchId); closeSearch() } else if (productCard && window.innerWidth <= 760 && !e.target.closest("button, a, input, select, textarea")) { openQuickView(productCard.dataset.id) } });
   $("#quickThumbs").addEventListener("click", e => { const b = e.target.closest("[data-thumb]"); if (!b) return; state.currentImage = Number(b.dataset.thumb); const p = state.currentProduct; $("#quickImage").src = p.images[state.currentImage]; $$('[data-thumb]').forEach(x => x.classList.toggle('active', x === b)) });
   $("#sizeChoices").addEventListener("click", e => { const b = e.target.closest("[data-size]"); if (!b) return; state.size = b.dataset.size; $$('[data-size]').forEach(x => x.classList.toggle('active', x === b)) });
   $("#colorChoices").addEventListener("click", e => { const b = e.target.closest("[data-color]"); if (!b) return; state.color = b.dataset.color; $$('[data-color]').forEach(x => x.classList.toggle('active', x === b)) });
   $("#qtyMinus").onclick = () => { state.quantity = Math.max(1, state.quantity - 1); $("#qtyValue").textContent = state.quantity }; $("#qtyPlus").onclick = () => { state.quantity = Math.min(10, state.quantity + 1); $("#qtyValue").textContent = state.quantity };
-  $("#quickWhatsapp").onclick = () => sendProductWhatsApp(state.currentProduct, { size: state.size, color: state.color, quantity: state.quantity }); $("#quickWishlist").onclick = () => toggleWishlist(state.currentProduct.id); $("#quickBag").onclick = () => toggleBag(state.currentProduct.id); $("#quickDetails").onclick = () => { const p = state.currentProduct; closeQuick(); location.hash = `product-${p.id}`; setTimeout(() => openQuickView(p.id), 100) };
-  document.addEventListener("keydown", e => { if (e.key === "Escape") { closeSearch(); closeQuick(); closeBag(); closeMobileMenu() } });
+  $("#quickWhatsapp").onclick = () => sendProductWhatsApp(state.currentProduct, { size: state.size, color: state.color, quantity: state.quantity }); $("#quickWishlist").onclick = () => { toggleWishlist(state.currentProduct.id); if (state.currentProduct) renderWishlistItems(); }; $("#quickBag").onclick = () => toggleBag(state.currentProduct.id); $("#quickDetails").onclick = () => { const p = state.currentProduct; closeQuick(); location.hash = `product-${p.id}`; setTimeout(() => openQuickView(p.id), 100) };
+  document.addEventListener("keydown", e => { if (e.key === "Escape") { closeSearch(); closeQuick(); closeBag(); closeWishlist(); closeMobileMenu() } });
 }
 function renderReviews() {
   const reviews = [
@@ -172,4 +200,4 @@ function renderReviews() {
 }
 function initHeaderWhatsApp() { const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Hello ${STORE_NAME}, I would like to know more about your collection.`)}`; $("#headerWhatsapp").href = url; $("#footerWhatsapp").href = url; $("#mobileWhatsapp").href = url }
 
-renderReviews(); initHeaderWhatsApp(); initEvents(); initSticky(); initializeObservers(); loadProducts();
+syncWishlistState(); renderReviews(); initHeaderWhatsApp(); initEvents(); initSticky(); initializeObservers(); loadProducts();

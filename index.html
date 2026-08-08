@@ -30,7 +30,7 @@
   <header class="site-header" id="siteHeader">
     <div class="nav-shell">
       <button class="icon-btn mobile-menu-btn" id="menuBtn" aria-label="Open menu" aria-controls="mobileDrawer"
-        aria-expanded="false"><span></span><span></span></button>
+        aria-expanded="false"><span></span><span></span><span></span></button>
       <a class="brand" href="#home" aria-label="VÉLORA MEN home"><span>VÉLORA</span><small>MEN</small></a>
       <nav class="desktop-nav" aria-label="Primary navigation">
         <a href="#home" class="active">Home</a><a href="#catalogue" data-nav-category="Shirts">Shirts</a><a
@@ -349,6 +349,21 @@
     </div>
   </div>
 
+  <aside class="side-panel" id="wishlistPanel" aria-hidden="true">
+    <div class="panel-head">
+      <div>
+        <p class="eyebrow">SAVED STYLES</p>
+        <h3>My Wishlist</h3>
+      </div><button class="icon-btn" id="closeWishlist" aria-label="Close wishlist">×</button>
+    </div>
+    <div class="panel-items" id="wishlistItems"></div>
+    <div class="panel-footer">
+      <div class="panel-total"><span>Saved styles</span><strong id="wishlistTotal">0</strong></div>
+      <button class="btn btn-dark full" id="sendWishlistWhatsapp">Send Wishlist on WhatsApp <span>↗</span></button>
+      <button class="text-link center-link" id="clearWishlist">Clear wishlist</button>
+    </div>
+  </aside>
+
   <aside class="side-panel" id="bagPanel" aria-hidden="true">
     <div class="panel-head">
       <div>
@@ -364,6 +379,7 @@
     </div>
   </aside>
   <div class="panel-backdrop" id="panelBackdrop"></div>
+
 
   <div class="modal-backdrop" id="quickBackdrop">
     <div class="quick-modal" id="quickModal" role="dialog" aria-modal="true" aria-labelledby="quickTitle"><button

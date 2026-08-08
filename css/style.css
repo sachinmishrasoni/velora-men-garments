@@ -18,6 +18,12 @@ html {
     scroll-behavior: smooth
 }
 
+html {
+    scroll-behavior: smooth;
+    scrollbar-color: #b29a75 #f0ece4;
+    scrollbar-width: thin
+}
+
 body {
     margin: 0;
     background: var(--paper);
@@ -28,6 +34,25 @@ body {
 
 body.lock {
     overflow: hidden
+}
+
+*::-webkit-scrollbar {
+    width: 10px;
+    height: 10px
+}
+
+*::-webkit-scrollbar-track {
+    background: #f0ece4
+}
+
+*::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #b99968, #7d6750);
+    border-radius: 999px;
+    border: 2px solid #f0ece4
+}
+
+*::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #a98b5b, #655540)
 }
 
 button,
@@ -172,36 +197,51 @@ img {
 .whatsapp-icon {
     border: 0;
     background: transparent;
-    width: 36px;
-    height: 36px;
+    width: 42px;
+    height: 42px;
     display: grid;
     place-items: center;
     color: inherit;
-    position: relative
+    position: relative;
+    border-radius: 50%;
+    transition: background .2s ease, transform .2s ease
+}
+
+.icon-btn:hover,
+.whatsapp-icon:hover {
+    background: rgba(255, 255, 255, .08)
+}
+
+.site-header.scrolled .icon-btn:hover,
+.site-header.scrolled .whatsapp-icon:hover {
+    background: rgba(23, 22, 20, .06)
 }
 
 .icon-btn svg,
 .whatsapp-icon svg {
-    width: 19px;
-    height: 19px;
+    width: 20px;
+    height: 20px;
     fill: none;
     stroke: currentColor;
-    stroke-width: 1.5
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round
 }
 
 .count-wrap em {
     position: absolute;
     top: 1px;
-    right: 0;
+    right: 1px;
     background: var(--ink);
     color: white;
     border-radius: 99px;
-    font-size: 7px;
+    font-size: 7.5px;
     font-style: normal;
-    min-width: 14px;
-    height: 14px;
+    min-width: 16px;
+    height: 16px;
     display: grid;
-    place-items: center
+    place-items: center;
+    padding: 0 4px
 }
 
 .site-header:not(.scrolled) .count-wrap em {
@@ -210,7 +250,40 @@ img {
 }
 
 .mobile-menu-btn {
-    display: none
+    display: none;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    flex-direction: column;
+    transition: transform .25s ease, background .2s ease;
+    padding: 0
+}
+
+.mobile-menu-btn span {
+    display: block;
+    width: 18px;
+    height: 2px;
+    background: currentColor;
+    border-radius: 99px;
+    transition: transform .28s ease, opacity .2s ease, width .2s ease;
+    transform-origin: center
+}
+
+.mobile-menu-btn[aria-expanded="true"] {
+    transform: rotate(180deg)
+}
+
+.mobile-menu-btn[aria-expanded="true"] span:nth-child(1) {
+    transform: translateY(5.5px) rotate(45deg)
+}
+
+.mobile-menu-btn[aria-expanded="true"] span:nth-child(2) {
+    opacity: 0;
+    transform: scaleX(0)
+}
+
+.mobile-menu-btn[aria-expanded="true"] span:nth-child(3) {
+    transform: translateY(-5.5px) rotate(-45deg)
 }
 
 .hero {
@@ -1440,32 +1513,81 @@ h2 i {
 
 .bag-item {
     display: grid;
-    grid-template-columns: 75px 1fr auto;
+    grid-template-columns: 82px minmax(0, 1fr) auto;
     gap: 14px;
-    padding: 15px 0;
-    border-bottom: 1px solid var(--line);
-    align-items: start
+    padding: 12px 12px 12px 10px;
+    border: 1px solid rgba(25, 20, 16, .08);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, .28);
+    align-items: center;
+    margin-bottom: 12px;
+    box-shadow: 0 8px 20px rgba(31, 25, 20, .04)
 }
 
 .bag-item img {
-    height: 95px
+    height: 96px;
+    width: 82px;
+    object-fit: cover;
+    border-radius: 12px;
+    background: #efe8df
 }
 
 .bag-item h4 {
     font-size: 11px;
-    margin: 0 0 5px
+    margin: 0 0 5px;
+    line-height: 1.4;
+    color: var(--ink)
 }
 
 .bag-item p {
     font-size: 9px;
     color: #8a857d;
-    margin: 0
+    margin: 0;
+    line-height: 1.5
 }
 
+.wish-item-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto
+}
+
+.wish-item-quick,
+.remove-wish,
 .remove-bag {
     border: 0;
     background: none;
-    font-size: 18px
+    font: inherit;
+    cursor: pointer
+}
+
+.wish-item-quick {
+    background: var(--ink);
+    color: #fff;
+    padding: 8px 10px;
+    border-radius: 999px;
+    font-size: 8px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    font-weight: 700
+}
+
+.remove-bag,
+.remove-wish {
+    font-size: 18px;
+    line-height: 1;
+    color: var(--ink);
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center
+}
+
+.remove-bag:hover,
+.remove-wish:hover {
+    background: rgba(23, 22, 20, .06)
 }
 
 .panel-footer {
@@ -1609,22 +1731,25 @@ h2 i {
 
 .quick-actions {
     display: grid;
-    grid-template-columns: auto 1fr 40px 40px;
+    grid-template-columns: auto minmax(0, 1fr) 40px 40px;
     gap: 8px;
-    margin-top: 15px
+    margin-top: 15px;
+    align-items: center
 }
 
 .qty {
     display: flex;
     border: 1px solid var(--line);
     height: 48px;
-    align-items: center
+    align-items: center;
+    min-width: 0
 }
 
 .qty button {
     border: 0;
     background: none;
-    width: 34px
+    width: 34px;
+    flex-shrink: 0
 }
 
 .qty span {
@@ -1635,11 +1760,17 @@ h2 i {
 
 .round-action {
     height: 48px;
-    width: 40px
+    width: 40px;
+    flex-shrink: 0
 }
 
 .quick-actions .btn {
-    height: 48px
+    height: 48px;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-inline: 14px
 }
 
 .details-link {
@@ -1881,7 +2012,9 @@ h2 i {
     }
 
     .mobile-menu-btn {
-        display: grid
+        display: grid;
+        width: 42px;
+        height: 42px
     }
 
     .desktop-nav {
@@ -2050,7 +2183,18 @@ h2 i {
     }
 
     .quick-trigger {
-        display: none
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 1;
+        transform: none;
+        pointer-events: auto;
+        left: 12px;
+        right: 12px;
+        bottom: 12px;
+        height: 36px;
+        font-size: 7px;
+        letter-spacing: .12em
     }
 
     .product-actions {
@@ -2206,16 +2350,36 @@ h2 i {
     }
 
     .quick-modal {
-        width: calc(100% - 18px);
+        position: fixed;
+        left: 50%;
+        top: 50%;
+        width: min(92vw, 420px);
+        max-width: calc(100vw - 12px);
         max-height: calc(100vh - 18px);
         grid-template-columns: 1fr;
-        top: 50%;
+        transform: translate(-50%, -47%) scale(.96);
+        overflow-x: hidden;
+        overflow-y: auto;
+        z-index: 120
+    }
+
+    .modal-backdrop.open .quick-modal {
+        transform: translate(-50%, -50%) scale(1)
+    }
+
+    .quick-gallery,
+    .quick-info,
+    .quick-thumbs,
+    .quick-actions {
+        min-width: 0;
+        max-width: 100%
     }
 
     .quick-gallery,
     .quick-gallery>img {
         min-height: 430px;
-        height: 430px
+        height: 430px;
+        width: 100%
     }
 
     .quick-info {
@@ -2322,7 +2486,32 @@ h2 i {
     }
 
     .quick-actions {
-        grid-template-columns: auto 1fr 38px 38px
+        grid-template-columns: auto minmax(0, 1fr) 36px 36px;
+        gap: 6px
+    }
+
+    .quick-actions .btn {
+        font-size: 7px;
+        letter-spacing: .08em;
+        padding-inline: 10px
+    }
+
+    .qty {
+        height: 42px
+    }
+
+    .qty button {
+        width: 28px
+    }
+
+    .qty span {
+        width: 22px;
+        font-size: 10px
+    }
+
+    .round-action {
+        height: 42px;
+        width: 36px
     }
 
     .footer-main {
