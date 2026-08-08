@@ -197,8 +197,9 @@ img {
 .whatsapp-icon {
     border: 0;
     background: transparent;
-    width: 42px;
-    height: 42px;
+    width: 40px;
+    min-width: 40px;
+    height: 40px;
     display: grid;
     place-items: center;
     color: inherit;
@@ -217,8 +218,49 @@ img {
     background: rgba(23, 22, 20, .06)
 }
 
+.icon-btn i,
+.whatsapp-icon i,
+.search-input-wrap i {
+    font-style: normal;
+    font-size: 1.05rem;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center
+}
+
+.icon-btn .fa-solid,
+.whatsapp-icon .fa-solid,
+.search-input-wrap .fa-solid,
+.mobile-menu-btn .fa-solid,
+.close-menu .fa-solid,
+.icon-btn .fa-xmark,
+.modal-close .fa-solid {
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900
+}
+
+.icon-btn .fa-regular,
+.whatsapp-icon .fa-regular,
+.search-input-wrap .fa-regular,
+.icon-btn .fa-heart {
+    font-family: "Font Awesome 6 Free";
+    font-weight: 400
+}
+
+.whatsapp-icon .fa-brands,
+.icon-btn .fa-brands {
+    font-family: "Font Awesome 6 Brands";
+    font-weight: 400
+}
+
+.mobile-menu-btn i {
+    font-size: 1.1rem
+}
+
 .icon-btn svg,
-.whatsapp-icon svg {
+.whatsapp-icon svg,
+.search-input-wrap svg {
     width: 20px;
     height: 20px;
     fill: none;
@@ -253,37 +295,17 @@ img {
     display: none;
     justify-content: center;
     align-items: center;
-    gap: 4px;
-    flex-direction: column;
     transition: transform .25s ease, background .2s ease;
     padding: 0
 }
 
-.mobile-menu-btn span {
-    display: block;
-    width: 18px;
-    height: 2px;
-    background: currentColor;
-    border-radius: 99px;
-    transition: transform .28s ease, opacity .2s ease, width .2s ease;
-    transform-origin: center
+.mobile-menu-btn i {
+    font-size: 1.15rem;
+    transition: transform .28s ease
 }
 
-.mobile-menu-btn[aria-expanded="true"] {
-    transform: rotate(180deg)
-}
-
-.mobile-menu-btn[aria-expanded="true"] span:nth-child(1) {
-    transform: translateY(5.5px) rotate(45deg)
-}
-
-.mobile-menu-btn[aria-expanded="true"] span:nth-child(2) {
-    opacity: 0;
-    transform: scaleX(0)
-}
-
-.mobile-menu-btn[aria-expanded="true"] span:nth-child(3) {
-    transform: translateY(-5.5px) rotate(-45deg)
+.mobile-menu-btn[aria-expanded="true"] i {
+    transform: rotate(90deg)
 }
 
 .hero {
@@ -810,7 +832,8 @@ h2 i {
 .card-bag {
     height: 35px;
     border: 1px solid var(--line);
-    font-size: 8px;
+    border-radius: 4px;
+    font-size: 10px !important;
     letter-spacing: .08em;
     text-transform: uppercase;
     font-weight: 700;
@@ -2418,7 +2441,8 @@ h2 i {
     }
 
     .back-top {
-        bottom: 74px;
+        /* bottom: 74px; */
+        bottom: 20px;
         right: 15px
     }
 
@@ -2510,8 +2534,10 @@ h2 i {
     }
 
     .round-action {
-        height: 42px;
-        width: 36px
+        height: 35px;
+        width: 35px;
+        min-width: 35px;
+        font-size: 18px;
     }
 
     .footer-main {
